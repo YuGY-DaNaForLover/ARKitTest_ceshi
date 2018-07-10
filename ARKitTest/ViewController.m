@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 
+
 @interface ViewController () <ARSCNViewDelegate>
 
 @property (nonatomic, strong) IBOutlet ARSCNView *sceneView;
@@ -25,12 +26,25 @@
     
     // Show statistics such as fps and timing information
     self.sceneView.showsStatistics = YES;
+}
+
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    ARFrame *currentFrame = self.sceneView.session.currentFrame;
     
-    // Create a new scene
-    SCNScene *scene = [SCNScene sceneNamed:@"art.scnassets/ship.scn"];
+    SCNPlane *plane = [SCNPlane planeWithWidth:0.6f height:0.4f];
+    plane.firstMaterial.diffuse.contents = [UIImage imageNamed:@"Image"];
+    plane.firstMaterial.lightingModelName = SCNLightingModelConstant;
     
-    // Set the scene to the view
-    self.sceneView.scene = scene;
+    simd_float4x4 translation = matrix_identity_float4x4;
+    translation.columns[3].z = -2;
+    simd_float4x4 transform = matrix_multiply(currentFrame.camera.transform, translation);
+    
+    
+    
+    SCNNode *node = [SCNNode nodeWithGeometry:plane];
+    node.simdTransform = transform;
+    
+    [self.sceneView.scene.rootNode addChildNode:node];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
